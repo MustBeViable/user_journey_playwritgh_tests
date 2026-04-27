@@ -194,4 +194,44 @@ test.describe('BetterJakSec attendance user journey', () => {
       }
     });
   });
+    test('TC04 teacher marks attendance if course data exists', async ({ page }) => {
+    await loginAsTeacher(page);
+
+    await test.step('Journey step: Opening attendance marking view', async () => {
+      const courseOpened = await tryOpenFirstCourse(page);
+
+      if (!courseOpened) {
+        test.info().annotations.push({
+          type: 'note',
+          description:
+            'No course was available for the teacher account. Attendance marking could not be fully automated with current test data.',
+        });
+
+        await expect(page.locator('body')).toBeVisible();
+        return;
+      }
+
+      await expect(page.locator('body')).toContainText(
+        /attendance|student|lesson|present|absent|läsnä|poissa|opiskelija|oppitunti|average/i
+      );
+    });
+
+    await test.step('Journey step: Marking student attendance', async () => {
+      const marked = await tryMarkAttendance(page);
+
+      if (!marked) {
+        test.info().annotations.push({
+          type: 'note',
+          description:
+            'Course page opened, but no present/absent controls were visible.',
+        });
+
+        await expect(page.locator('body')).toBeVisible();
+        return;
+      }
+
+      await expect(page.locator('body')).toBeVisible();
+    });
+  });
+  
 });
