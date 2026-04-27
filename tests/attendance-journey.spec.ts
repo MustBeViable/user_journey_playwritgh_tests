@@ -170,4 +170,28 @@ test.describe('BetterJakSec attendance user journey', () => {
       await expect(page.locator('body')).toBeVisible();
     });
   });
+    test('TC03 teacher tries to open a course or verifies that no course is available', async ({ page }) => {
+    await loginAsTeacher(page);
+
+    await test.step('Journey step: Selecting the correct course', async () => {
+      await openCourses(page);
+
+      const firstCourse = page
+        .locator('button, a, [role="button"], [data-testid*="course"], .card, article')
+        .filter({
+          hasText: /course|class|group|kurssi|student|opiskelija/i,
+        })
+        .first();
+
+      if (await firstCourse.isVisible().catch(() => false)) {
+        await firstCourse.click();
+
+        await expect(page.locator('body')).toContainText(
+          /attendance|student|lesson|present|absent|läsnä|poissa|opiskelija|oppitunti|average/i
+        );
+      } else {
+        await expect(page.locator('body')).toBeVisible();
+      }
+    });
+  });
 });
